@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup
 
 #~~~ Configure: ~~~#
 # URL of album to download
-url = ""
+url = "https://downloads.khinsider.com/game-soundtracks/album/genshin-impact-forest-of-jnana-and-vidya-original-game-soundtrack-2022"
 # Songs to download based on order listed, leave empty to download all
 which_songs = []
 # Will download as MP3 if False, or as FLAC if True (Make sure the album actually has FLAC format available)
