@@ -14,7 +14,7 @@ url = "https://downloads.khinsider.com/game-soundtracks/album/genshin-impact-for
 # Songs to download based on order listed, leave empty to download all
 which_songs = []
 # Will download as MP3 if False, or as FLAC if True (Make sure the album actually has FLAC format available)
-flac = False
+flac = True
 # Browser header
 headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/118.0"}
 
@@ -29,7 +29,8 @@ for num in which_songs:
     if num < 1 or num > len(links):
         raise Exception("Requested to download a song that doesn't exist (check which_songs!)")
 
-album_name = soup.find("h2").get_text()
+invalid_chars = ['\\', '/', ':', '*', '?', '"', '<', '>', '|']
+album_name = ''.join([c for c in soup.find("h2").get_text() if c not in invalid_chars])
 print(f"Downloading album: {album_name}")
 
 def parse_and_download(link: str):
