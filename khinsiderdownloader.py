@@ -14,7 +14,7 @@ url = "https://downloads.khinsider.com/game-soundtracks/album/genshin-impact-for
 # Songs to download based on order listed, leave empty to download all
 which_songs = []
 # Will download as MP3 if False, or as FLAC if True (Make sure the album actually has FLAC format available)
-flac = True
+flac = False
 # Browser header
 headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/118.0"}
 
