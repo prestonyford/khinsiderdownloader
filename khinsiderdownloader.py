@@ -17,7 +17,9 @@ which_songs = []
 # Will download as MP3 if False, or as FLAC if True (Make sure the album actually has FLAC format available)
 flac = False
 # Will download any additional images associated with the album (cover art, disc art, logos, etc.)
-album_images = False
+album_images = True
+# Directory to save album to (a new folder will be created), leave empty to save to the current working directory
+directory = ""
 # Browser header
 headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/118.0"}
 
@@ -35,7 +37,16 @@ for num in which_songs:
 
 invalid_chars = ['\\', '/', ':', '*', '?', '"', '<', '>', '|']
 album_name = ''.join([c for c in soup.find("h2").get_text() if c not in invalid_chars])
-print(f"Album: {album_name}")
+print(f"Album: {album_name}\n")
+
+album_directory = album_name if len(directory) == 0 else os.path.join(directory, album_name)
+
+# Make local directory
+if not os.path.exists(album_directory):
+    os.makedirs(album_directory)
+if not os.path.exists(album_directory):
+    print("Error creating album directory")
+    exit()
 
 
 def download_image(url: str):
@@ -43,11 +54,11 @@ def download_image(url: str):
     path = parsed_url.path
     filename = unquote(os.path.basename(path))
 
-    with open(os.path.join(album_name, filename), "wb") as file:
+    with open(os.path.join(album_directory, filename), "wb") as file:
         file.write(requests.get(url).content)
         print(f"\t{filename}")
 
-def parse_and_download_song(link: str):
+def download_song(link: str):
     download_page = requests.get(f"https://downloads.khinsider.com{link}")
     if download_page.status_code == 200:
         download_page_soup = BeautifulSoup(download_page.content, "html.parser")
@@ -58,17 +69,10 @@ def parse_and_download_song(link: str):
         else:
             audio_file = download_page_soup.find("div", id="pageContent").find_all("p")[4].find("a", href=True)["href"]
 
-        with open(os.path.join(album_name, f"{title}.{'mp3' if flac == False else 'flac'}"), "wb") as file:
+        with open(os.path.join(album_directory, f"{title}.{'mp3' if flac == False else 'flac'}"), "wb") as file:
             file.write(requests.get(audio_file).content)
             print(f"\t{title}.{'mp3' if flac == False else 'flac'}")
 
-
-# Make local directory
-if not os.path.exists(album_name):
-    os.makedirs(album_name)
-if not os.path.exists(album_name):
-    print("Error creating album directory")
-    exit()
 
 # Download album images
 if album_images:
@@ -83,14 +87,14 @@ if album_images:
         thread.join()
 
     elapsed_time = time.time() - start_time
-    print(f"Downloaded {len(threads)} image(s) in {round(elapsed_time, 2)} seconds\n")
+    print(f"Downloaded {len(threads)} image(s) in {round(elapsed_time, 2)} seconds")
 
 # Download songs
 print("Downloading songs...")
 if len(which_songs) == 0:
-    threads = [threading.Thread(target=parse_and_download_song, args=[link]) for link in links]
+    threads = [threading.Thread(target=download_song, args=[link]) for link in links]
 else:
-    threads = [threading.Thread(target=parse_and_download_song, args=[link]) for index, link in enumerate(links) if index + 1 in which_songs]
+    threads = [threading.Thread(target=download_song, args=[link]) for index, link in enumerate(links) if index + 1 in which_songs]
 
 start_time = time.time()
 for thread in threads:
